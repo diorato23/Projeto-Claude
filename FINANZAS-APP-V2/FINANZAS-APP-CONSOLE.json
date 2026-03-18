@@ -565,7 +565,7 @@
         "promptType": "define",
         "text": "={{ $('agrupaDados').item.json.query }}",
         "options": {
-          "systemMessage": "=# Agente Maestro: Asistente Financiero 🇨🇴\n\nEres un asistente de finanzas personales para familias colombianas. Tu objetivo es ayudar a gestionar ingresos y gastos de forma natural y eficiente.\n\n## Reglas de Interacción:\n- **Idioma**: Siempre responde en **Español**.\n- **Conversación**: Saluda y conversa naturalmente si el usuario solo quiere hablar.\n- **Registro de Gastos/Ingresos**: \n  1. Extrae los datos (monto, descripción, categoría).\n  2. **Obligatorio**: Antes de registrar, apresenta los datos y pregunta: \"¿Confirmas el registro de este [tipo]?\" con el resumen.\n  3. Si el usuario confirma, usa la ferramenta `tool_registrar_transacao`.\n  4. Tras el registro, da una breve **Dica Financiera** basada en la categoría.\n- **Listado**: Si el usuario quiere ver sus gastos, usa `tool_listar_transacciones`.\n- **Edición/Eliminación**: Usa `tool_gestionar_transacciones`. Pede el ID de la transacción si no lo tienes.\n- **Categorías**: Puedes listar, crear o eliminar categorías usando `tooll_categorias`. \n- **Presupuestos (Orçamentos)**: Puedes definir límites por categoría o consultar el estado atual com `tooll_presupuestos`.\n\n## Herramientas disponibles:\n- `tool_registrar_transacao`: Crear nuevos registros.\n- `tool_listar_transacciones`: Ver movimientos recientes.\n- `tool_gestionar_transacciones`: Editar o eliminar registros.\n- `tooll_categorias`: Gestionar (listar/crear/eliminar) categorías de gastos.\n- `tooll_presupuestos`: Gestionar (definir/consultar) metas de gasto por categoría.\n\nSiempre sé amable, usa emojis y mantén el contexto de la familia del usuario."
+          "systemMessage": "=# Agente Maestro: Asistente Financiero 🇨🇴\n\nEres un asistente de finanzas personales para familias colombianas. Tu objetivo es ayudar a gestionar ingresos y gastos de forma natural y eficiente.\n\n## Reglas de Interacción:\n- **Idioma**: Siempre responde en **Español**.\n- **Conversación**: Saluda y conversa naturalmente si el usuario solo quiere hablar.\n- **Registro de Gastos/Ingresos**: \n  1. Extrae los datos (monto, descripción, categoría).\n  2. **Obligatorio**: Antes de registrar, apresenta los datos y pregunta: \"¿Confirmas el registro de este [tipo]?\" con el resumen.\n  3. Si el usuario confirma, usa la ferramenta `tool_registrar_transacao`.\n  4. Tras el registro, da una breve **Dica Financiera** basada en la categoría.\n- **Listado**: Si el usuario quiere ver sus gastos, usa `tool_listar_transacciones`.\n- **Edición/Eliminación**: Para editar o eliminar, PRIMERO usa `tool_buscar_detalhada` para encontrar el ID exacto. En o campo `query`, usa SOLO el nombre del gasto o la categoría (ej: \"Pizza\" en lugar de \"¿Puedes borrar la Pizza?\"). NUNCA uses la descripción completa si incluye preguntas. Si no encuentras el ID, informa al usuario.\n- **Categorías**: Puedes listar, crear o eliminar categorías usando `tooll_categorias`. \n- **Presupuestos (Orçamentos)**: Puedes definir límites por categoría o consultar el estado atual com `tooll_presupuestos`.\n\n## Herramientas disponibles:\n- `tool_registrar_transacao`: Crear nuevos registros.\n- `tool_listar_transacciones`: Ver movimientos recientes.\n- `tool_buscar_detalhada`: BUSCA IDs de transacciones, categorías y presupuestos vinculados (USA ESTA ANTES DE ELIMINAR).\n- `tool_gestionar_transacciones`: Editar o eliminar registros.\n- `tooll_categorias`: Gestionar (listar/crear/eliminar) categorías de gastos.\n- `tooll_presupuestos`: Gestionar (definir/consultar) metas de gasto por categoría.\n\nSiempre sé amable, usa emojis y mantén el contexto de la familia del usuario."
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
@@ -921,7 +921,7 @@
               "removed": false
             }
           ],
-          "attemptToConvertTypes": false,
+          "attemptToConvertTypes": true,
           "convertFieldsToString": true
         },
         "mode": "each",
@@ -948,7 +948,7 @@
           "mappingMode": "defineBelow",
           "value": {
             "telefone": "={{ $('trataDados').first().json.telefone }}",
-            "limite": "={{ $json.limite }}"
+            "limite": "={{ $json.query.limite }}"
           },
           "matchingColumns": [],
           "schema": [
@@ -963,7 +963,7 @@
               "removed": false
             }
           ],
-          "attemptToConvertTypes": false,
+          "attemptToConvertTypes": true,
           "convertFieldsToString": true
         }
       },
@@ -987,12 +987,12 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "action": "={{ $json.action }}",
-            "transaccion_id": "={{ $json.transaccion_id }}",
+            "action": "={{ $json.query.action }}",
+            "transaccion_id": "={{ $json.query.transaccion_id }}",
             "telefone": "={{ $('trataDados').first().json.telefone }}",
-            "monto": "={{ $json.monto }}",
-            "descripcion": "={{ $json.descripcion }}",
-            "categoria": "={{ $json.categoria }}"
+            "monto": "={{ $json.query.monto }}",
+            "descripcion": "={{ $json.query.descripcion }}",
+            "categoria": "={{ $json.query.categoria }}"
           },
           "matchingColumns": [],
           "schema": [
@@ -1047,7 +1047,7 @@
               "removed": false
             }
           ],
-          "attemptToConvertTypes": false,
+          "attemptToConvertTypes": true,
           "convertFieldsToString": true
         }
       },
@@ -1071,9 +1071,9 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "action": "={{ $json.action }}",
-            "nombre": "={{ $json.nombre }}",
-            "categoria_id": "={{ $json.categoria_id }}",
+            "action": "={{ $json.query.action }}",
+            "nombre": "={{ $json.query.nombre }}",
+            "categoria_id": "={{ $json.query.categoria_id }}",
             "telefone": "={{ $('trataDados').first().json.telefone }}"
           },
           "matchingColumns": [],
@@ -1109,7 +1109,7 @@
               "removed": false
             }
           ],
-          "attemptToConvertTypes": false,
+          "attemptToConvertTypes": true,
           "convertFieldsToString": true
         }
       },
@@ -1133,10 +1133,10 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "action": "={{ $json.action }}",
-            "categoria": "={{ $json.categoria }}",
-            "monto_limite": "={{ $json.monto_limite }}",
-            "mes_anio": "={{ $json.mes_anio }}",
+            "action": "={{ $json.query.action }}",
+            "categoria": "={{ $json.query.categoria }}",
+            "monto_limite": "={{ $json.query.monto_limite }}",
+            "mes_anio": "={{ $json.query.mes_anio }}",
             "telefone": "={{ $('trataDados').first().json.telefone }}"
           },
           "matchingColumns": [],
@@ -1182,7 +1182,7 @@
               "removed": false
             }
           ],
-          "attemptToConvertTypes": false,
+          "attemptToConvertTypes": true,
           "convertFieldsToString": true
         }
       },
@@ -1194,6 +1194,46 @@
       ],
       "id": "tool_presupuestos_node_id",
       "name": "tooll_presupuestos"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "search-detailed-workflow-id",
+          "mode": "list",
+          "cachedResultName": "tool_buscar_transacao_detalhada"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "query": "={{ $json.query.query }}",
+            "telefone": "={{ $('trataDados').first().json.telefone }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "query",
+              "displayName": "query",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": true,
+          "convertFieldsToString": true
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        2256,
+        1700
+      ],
+      "id": "tool_buscar_detalhada_node_id",
+      "name": "tool_buscar_detalhada"
     },
     {
       "parameters": {
@@ -1332,6 +1372,11 @@
           },
           {
             "node": "tooll_presupuestos",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "tool_buscar_detalhada",
             "type": "main",
             "index": 0
           }

@@ -87,6 +87,8 @@
         600,
         240
       ],
+      "onError": "continue",
+      "alwaysOutputData": true,
       "credentials": {
         "httpBearerAuth": {
           "id": "R1qKKa1g1IqG8OAo",

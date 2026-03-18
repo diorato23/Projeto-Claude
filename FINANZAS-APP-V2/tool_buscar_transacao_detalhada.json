@@ -1,0 +1,137 @@
+{
+  "name": "tool_buscar_transacao_detalhada",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "query"
+            },
+            {
+              "name": "telefone"
+            }
+          ]
+        }
+      },
+      "id": "search-input-id",
+      "name": "receberDadosExterno",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        380,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const query = $json.query || '';\nconst telefone = $json.telefone || '';\n\n// Lista de palavras a ignorar (stop words em português/espanhol)\nconst ignore = ['quero', 'apagar', 'excluir', 'deletar', 'buscar', 'encontrar', 'pode', 'quiere', 'borrar', 'eliminar', 'buscar', 'encontrar', 'puede', 'la', 'el', 'un', 'una', 'de', 'para'];\n\n// Limpa a query: remove pontuação, converte pra minúsculo e filtra palavras curtas ou irrelevantes\nlet cleanQuery = query.toLowerCase()\n  .replace(/[?!.,;]/g, '')\n  .split(' ')\n  .filter(word => word.length > 2 && !ignore.includes(word))\n  .join(' ');\n\n// Se a query ficar vazia, tenta manter a original sem os caracteres especiais\nif (!cleanQuery) cleanQuery = query.replace(/[?!.,;]/g, '');\n\nreturn {\n  query: cleanQuery,\n  original_query: query,\n  telefone: telefone.replace('@s.whatsapp.net', '')\n};"
+      },
+      "id": "limpar-query-id",
+      "name": "Limpar Dados",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1.2,
+      "position": [
+        500,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n    t.id as transaccion_id,\n    t.descripcion,\n    t.monto,\n    t.categoria,\n    t.tipo,\n    t.estado,\n    t.created_at,\n    p.monto_limite as presupuesto_limite,\n    p.mes_anio as presupuesto_periodo\nFROM transacciones t\nLEFT JOIN presupuestos p ON t.categoria = p.categoria AND t.familia_id = p.familia_id\nJOIN perfiles pf ON t.familia_id = pf.familia_id\nWHERE pf.whatsapp = '{{ $json.telefone }}'\n  AND (t.descripcion ILIKE '%{{ $json.query }}%' OR t.categoria ILIKE '%{{ $json.query }}%')\nORDER BY t.created_at DESC\nLIMIT 5;",
+        "options": {}
+      },
+      "id": "postgres-query-id",
+      "name": "Buscar no Postgres",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        700,
+        240
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "2ETyHxm96KwYUZNP",
+          "name": "Postgres Finanzas-app"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const results = $input.all();\nif (results.length === 0) {\n  return [{ json: { success: true, message: \"🔍 No encontré transacciones que coincidan con '\" + $node[\"receberDadosExterno\"].json.query + \"'.\" } }];\n}\n\nlet msg = \"🔍 *Encontré las siguientes transacciones:*\\n\\n\";\nresults.forEach(item => {\n  const row = item.json;\n  const emoji = row.tipo === 'pago' ? '📉' : '📈';\n  const monto = Number(row.monto).toLocaleString('es-CO');\n  msg += `${emoji} *${row.descripcion}*\\n💰 $${monto} | 📂 ${row.categoria}\\n🆔 \\`${row.transaccion_id}\\`\\n`;\n  if (row.presupuesto_limite) {\n    msg += `📊 *Presupuesto:* $${Number(row.presupuesto_limite).toLocaleString('es-CO')} (${row.presupuesto_periodo})\\n`;\n  }\n  msg += \"\\n\";\n});\n\nreturn [{ json: { success: true, message: msg.trim(), data: results.map(r => r.json) } }];"
+      },
+      "id": "format-response-id",
+      "name": "Formatar Resposta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1.2,
+      "position": [
+        920,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "final-return-id",
+      "name": "Retorno Final",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1140,
+        240
+      ]
+    }
+  ],
+  "connections": {
+    "receberDadosExterno": {
+      "main": [
+        [
+          {
+            "node": "Limpar Dados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limpar Dados": {
+      "main": [
+        [
+          {
+            "node": "Buscar no Postgres",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar no Postgres": {
+      "main": [
+        [
+          {
+            "node": "Formatar Resposta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatar Resposta": {
+      "main": [
+        [
+          {
+            "node": "Retorno Final",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
