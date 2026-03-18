@@ -25,5 +25,5 @@ Thumbs.db
 # Local temp scripts
 tmp_*.js
 
-# This directory is its own Git repository; keep it separate
-finanzas-app/
+# This directory is a git submodule
+!finanzas-app/

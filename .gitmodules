@@ -1,0 +1,3 @@
+[submodule "finanzas-app"]
+	path = finanzas-app
+	url = https://github.com/diorato23/finanzas-app.git
