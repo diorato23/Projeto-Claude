@@ -1,0 +1,111 @@
+{
+  "name": "tool_listar_transacciones",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "query"
+            },
+            {
+              "name": "limite"
+            },
+            {
+              "name": "telefone"
+            }
+          ]
+        }
+      },
+      "id": "e3a1d9b4-5c2d-4e1a-8f9a-c2b3d4e5f6a7",
+      "name": "receberDadosExterno",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        380,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://bolsillo.ktuche.com/api/webhook/transacciones",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "keypair",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "action",
+              "value": "listar"
+            },
+            {
+              "name": "whatsapp",
+              "value": "={{ $json.telefone.replace('@s.whatsapp.net', '') }}"
+            },
+            {
+              "name": "limite",
+              "value": "={{ $json.limite || 5 }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f4b2c1d3-6e3f-4a0b-9c1d-8e2f3a4b5c6d",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        600,
+        240
+      ],
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "R1qKKa1g1IqG8OAo",
+          "name": "Whatsapp Bearer Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "retornoFinal",
+      "name": "Retorno Final",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        820,
+        240
+      ]
+    }
+  ],
+  "connections": {
+    "receberDadosExterno": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Retorno Final",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

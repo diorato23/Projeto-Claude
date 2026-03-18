@@ -1,0 +1,150 @@
+{
+  "name": "tool_gestionar_presupuestos",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "action"
+            },
+            {
+              "name": "categoria"
+            },
+            {
+              "name": "monto_limite"
+            },
+            {
+              "name": "mes_anio"
+            },
+            {
+              "name": "telefone"
+            }
+          ]
+        }
+      },
+      "id": "i5j6k7l8-m9n0-o1p2-q3r4-s5t6u7v8w9x0",
+      "name": "receberDadosExterno",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        380,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://bolsillo.ktuche.com/api/webhook/presupuestos",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "keypair",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "action",
+              "value": "={{ $json.action || \"consultar\" }}"
+            },
+            {
+              "name": "categoria",
+              "value": "={{ $json.categoria || \"\" }}"
+            },
+            {
+              "name": "monto_limite",
+              "value": "={{ Number($json.monto_limite) || 0 }}"
+            },
+            {
+              "name": "mes_anio",
+              "value": "={{ $json.mes_anio || \"\" }}"
+            },
+            {
+              "name": "whatsapp",
+              "value": "={{ $json.telefone ? $json.telefone.replace('@s.whatsapp.net', '') : \"\" }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "j6k7l8m9-n0o1-p2q3-r4s5-t6u7v8w9x0y1",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        600,
+        240
+      ],
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "R1qKKa1g1IqG8OAo",
+          "name": "Whatsapp Bearer Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const resposta = $input.first().json;\nconst acao = $node[\"receberDadosExterno\"].json.action || 'consultar';\n\nif (resposta.success) {\n  if (acao === 'consultar') {\n    if (resposta.presupuestos.length === 0) {\n        return [{ json: { mensagem: \"💰 *Presupuestos:*\\n\\nNo tienes presupuestos definidos para este periodo.\" }}];\n    }\n    const lista = resposta.presupuestos.map(p => \n      `• *${p.categoria}*: ${p.gastado} / ${p.limite} (${p.porcentaje}) ${p.alerta}`\n    ).join('\\n');\n    return [{ json: { mensagem: `💰 *Estado de Presupuestos (${resposta.periodo}):*\\n\\n${lista}` }}];\n  }\n  return [{ json: { mensagem: resposta.message || \"✅ Presupuesto actualizado\" }}];\n}\n\nreturn [{ json: { mensagem: `❌ *Error:* ${resposta.error || 'Desconhecido'}` }}];"
+      },
+      "id": "k7l8m9n0-o1p2-q3r4-s5t6-u7v8w9x0y1z2",
+      "name": "Formatar Resposta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1.2,
+      "position": [
+        820,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "l8m9n0o1-p2q3-r4s5-t6u7-v8w9x0y1z2a3",
+      "name": "Retorno Final",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1040,
+        240
+      ]
+    }
+  ],
+  "connections": {
+    "receberDadosExterno": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Formatar Resposta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatar Resposta": {
+      "main": [
+        [
+          {
+            "node": "Retorno Final",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

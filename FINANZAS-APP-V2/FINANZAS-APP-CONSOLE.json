@@ -1,0 +1,1403 @@
+{
+  "name": "FINANZAS-APP-CONSOLE",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        208,
+        928
+      ],
+      "id": "9b4fa59c-9b73-44a8-b03c-9996b0a1d91c",
+      "name": "inputTest",
+      "webhookId": "57cfbf9f-a1a4-4ce9-bcd6-4f96a661051f"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8de1b1bd-d78c-4209-8444-50a24e7ac302",
+              "name": "query",
+              "value": "={{ $json.chatInput }}",
+              "type": "string"
+            },
+            {
+              "id": "4f098761-bdda-4158-924c-3355e9fee9d5",
+              "name": "identifier",
+              "value": "=test-n8n-{{ $json.sessionId }}",
+              "type": "string"
+            },
+            {
+              "id": "9acdda90-37a4-40af-9394-4bd982345294",
+              "name": "telefone",
+              "value": "573138310085@s.whatsapp.net",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        496,
+        928
+      ],
+      "id": "9f29e040-9ed5-4f1d-9689-6ffe10825e67",
+      "name": "trataDados"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "query"
+            },
+            {
+              "name": "identifier"
+            },
+            {
+              "name": "telefone"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        464,
+        1200
+      ],
+      "id": "534d234a-8d90-4c87-bbe9-912c03b8b38d",
+      "name": "recebeDadosExternos"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        752,
+        944
+      ],
+      "id": "b20ec639-75d0-4797-a6e1-38c0f9aa8c65",
+      "name": "agrupaDados"
+    },
+    {
+      "parameters": {
+        "content": "                                           ",
+        "height": 192,
+        "width": 292,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        112,
+        912
+      ],
+      "typeVersion": 1,
+      "id": "162c1081-36b5-4bc8-9074-75aa077f7aa4",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "#### **inputTest**\n*_(Tipo: Chat Trigger)_*\n**🎯 Objetivo:** Iniciar o fluxo para testes manuais.\n**📝 Detalhes:**\n* Este é um ponto de entrada para você testar o chatbot diretamente na interface do n8n, sem precisar conectar a um canal externo como o WhatsApp.\n* Tudo que você digitar no campo de mensagem deste nó será enviado como a `query` do usuário para o restante do fluxo.\n**🔧 Ação Necessária:** Nenhuma. Apenas utilize para testes.",
+        "height": 340,
+        "width": 284,
+        "color": 6
+      },
+      "id": "8ca7bd4e-ee39-4987-a916-e0d0fec74ef2",
+      "name": "Sticky Note67",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        112,
+        576
+      ]
+    },
+    {
+      "parameters": {
+        "content": "                                           ",
+        "height": 192,
+        "width": 292,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        400,
+        912
+      ],
+      "typeVersion": 1,
+      "id": "cbccb466-7ce1-4644-b991-f68db5d9cd90",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "#### **trataDados**\n*_(Tipo: Set)_*\n**🎯 Objetivo:** Padronizar os dados de entrada para o sistema.\n**📝 Detalhes:**\n* Este nó pega a mensagem do usuário (`chatInput`) e o ID da sessão (`sessionId`) do `inputTest`.\n* Ele organiza esses dados em um formato JSON limpo, com as chaves `query` e `identifier`, que serão usadas por todo o workflow para identificar a mensagem e o histórico da conversa.\n**🔧 Ação Necessária:** Nenhuma. Este nó já está configurado para funcionar com o `inputTest`.",
+        "height": 356,
+        "width": 284,
+        "color": 6
+      },
+      "id": "56f367cf-bf97-44b2-9069-3d28b60d3fea",
+      "name": "Sticky Note68",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        400,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "content": "                                           ",
+        "height": 384,
+        "width": 292,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        400,
+        1104
+      ],
+      "typeVersion": 1,
+      "id": "124dff60-0f2c-453b-9c4b-51350d104186",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "#### **recebeDadosExternos**\n*_(Tipo: Execute Workflow Trigger)_*\n**🎯 Objetivo:** Permitir que este workflow seja iniciado por outro fluxo.\n**📝 Detalhes:**\n* Este nó funciona como um ponto de entrada alternativo. É útil para integrações mais complexas, como receber dados de um webhook de WhatsApp que já passou por um tratamento inicial em outro workflow (como a verificação de cliente no Supabase que você mostrou no print).\n**🔧 Ação Necessária:** Nenhuma para o funcionamento básico, mas pode ser conectado a outros workflows conforme sua necessidade.\n",
+        "height": 388,
+        "width": 284,
+        "color": 6
+      },
+      "id": "52704960-7b1c-4a05-950e-bfd2a0236a75",
+      "name": "Sticky Note70",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        112,
+        1104
+      ]
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 1508,
+        "width": 2284,
+        "color": 7
+      },
+      "id": "50321e5b-1382-4181-bb4d-1c8f7dca0bbe",
+      "name": "Sticky Note82",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        32,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "content": "# Configuração e Componentes Centrais da IA\n\n## Esta seção aborda os nós essenciais que servem como base para o funcionamento de todo o sistema de IA, incluindo a entrada de dados.\n",
+        "height": 212,
+        "width": 2220,
+        "color": 6
+      },
+      "id": "3e457258-2e13-4fc7-8c59-a1b1158615b1",
+      "name": "Sticky Note83",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "delete from n8n_chat_histories",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        6128,
+        1424
+      ],
+      "id": "f5f12de0-e89c-4901-9601-b4f1d3c4c5d3",
+      "name": "deletaHistoricoChatN8n",
+      "credentials": {
+        "postgres": {
+          "id": "2ETyHxm96KwYUZNP",
+          "name": "Postgres Finanzas-app"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "delete from chats",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        6368,
+        1424
+      ],
+      "id": "f9586ef3-7eba-4499-8b4c-d5ce5e23ac0f",
+      "name": "deletaConteudoChats",
+      "credentials": {
+        "postgres": {
+          "id": "2ETyHxm96KwYUZNP",
+          "name": "Postgres Finanzas-app"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "delete from chat_messages",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        6128,
+        1632
+      ],
+      "id": "ce557eb8-5024-4f4d-8f1b-99ca4ceaa72e",
+      "name": "deletaConteudoChatMessages",
+      "credentials": {
+        "postgres": {
+          "id": "2ETyHxm96KwYUZNP",
+          "name": "Postgres Finanzas-app"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 1",
+        "height": 80,
+        "width": 150,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        6080,
+        1024
+      ],
+      "typeVersion": 1,
+      "id": "20ac5d43-7eea-48e2-b1dc-704391dbba4a",
+      "name": "Sticky Note31"
+    },
+    {
+      "parameters": {
+        "content": "## 2",
+        "height": 80,
+        "width": 150,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        6080,
+        1200
+      ],
+      "typeVersion": 1,
+      "id": "0555894f-8b09-4afe-8e7d-59774530eee0",
+      "name": "Sticky Note33"
+    },
+    {
+      "parameters": {
+        "content": "## Execute na Ordem",
+        "height": 80,
+        "width": 250,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        6064,
+        912
+      ],
+      "typeVersion": 1,
+      "id": "474a9043-c609-4a2c-aed8-79235764794d",
+      "name": "Sticky Note38"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "CREATE TABLE chat_messages (\n  id BIGSERIAL PRIMARY KEY,\n  created_at TIMESTAMPTZ, \n  phone TEXT,\n  conversation_id TEXT, \n  bot_message TEXT,\n  user_message TEXT, \n  active BOOLEAN DEFAULT TRUE\n);\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        6144,
+        1024
+      ],
+      "id": "9a2092f5-4b45-4b32-bb9d-82815c0a381e",
+      "name": "1 - criaTabelaChatMessages",
+      "credentials": {
+        "postgres": {
+          "id": "2ETyHxm96KwYUZNP",
+          "name": "Postgres Finanzas-app"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "create table chats (\n  id bigserial primary key,\n  created_at TIMESTAMPTZ, \n  phone text,\n  updated_at text,\n  ai_service text,\n  conversation_id text,\n  memoria_contexto text\n);",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        6144,
+        1200
+      ],
+      "id": "d079e01e-b917-4fcd-9dd8-3955fc6a4648",
+      "name": "2 - criaTabelaChats",
+      "credentials": {
+        "postgres": {
+          "id": "2ETyHxm96KwYUZNP",
+          "name": "Postgres Finanzas-app"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 464,
+        "width": 540,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        6064,
+        912
+      ],
+      "typeVersion": 1,
+      "id": "67c115e9-8099-4b65-9912-77cfcb096e10",
+      "name": "Sticky Note24"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 400,
+        "width": 560,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        6048,
+        1408
+      ],
+      "typeVersion": 1,
+      "id": "a4be311a-fda1-4681-b042-4a10d6b53949",
+      "name": "Sticky Note25"
+    },
+    {
+      "parameters": {
+        "content": "# 🧹 Ferramentas para apagar\n\n- **deletaHistoricoChatN8n**  \n  Apaga o histórico padrão de conversas do N8N (n8n_chat_histories).\n\n- **deletaConteudoChatMessages**  \n  Limpa a tabela de interações entre bot e usuário.\n\n- **deletaConteudoChats**  \n  Remove sessões de chat (identificadores).\n",
+        "height": 400,
+        "width": 296,
+        "color": 6
+      },
+      "id": "6e08b18b-13be-4295-9497-475ed428964a",
+      "name": "Sticky Note9",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        5744,
+        1408
+      ]
+    },
+    {
+      "parameters": {
+        "content": "# 🛠️ Ferramentas para criar\n\n- **criaTabelaChatMessages**  \n  Tabela que armazena interações entre usuário e IA.\n\n- **criaTabelaDadosCliente**  \n  Registra número, sessão e se foi atendimento humano ou IA.\n\n- **criaTabelaChats**  \n  Estrutura de controle para sessões com identificação e atualização.\n",
+        "height": 448,
+        "width": 296,
+        "color": 6
+      },
+      "id": "ca36d021-711d-40ad-98dd-2e5d952e2b9e",
+      "name": "Sticky Note26",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        5760,
+        912
+      ]
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('agrupaDados').first().json.identifier }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        1296,
+        1296
+      ],
+      "id": "8f99013d-f1ab-40ff-b081-007189589c87",
+      "name": "Postgres Chat Memory1",
+      "credentials": {
+        "postgres": {
+          "id": "2ETyHxm96KwYUZNP",
+          "name": "Postgres Finanzas-app"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "#### **buscaContexto**\n*_(Tipo: Supabase Get)_*\n\n**🎯 Objetivo:** Injeção de Memória (Cérebro).\n\n**📝 Detalhes:**\n* Este é o segredo da memória eficiente. Antes de chamar a IA, este nó vai no banco de dados e busca o `memoria_contexto` atual deste cliente pelo telefone.\n* Se o cliente já existe, ele traz o resumo (nome, preferências, histórico). Se não, traz vazio.\n* Esse texto é passado para o Roteador, permitindo que ele saiba quem é o cliente **antes** de começar a falar.\n\n**🔧 Ação Necessária:** Verifique se a credencial do Supabase e o nome da tabela (`chats`) estão corretos.\n",
+        "height": 596,
+        "width": 220,
+        "color": 6
+      },
+      "id": "2c931d21-47b0-427d-8c50-fe3cde5babdd",
+      "name": "Sticky Note69",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        912,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "content": "#### **agrupaDados**\n*_(Tipo: Merge)_*\n**🎯 Objetivo:** Unificar os pontos de entrada do fluxo.\n**📝 Detalhes:**\n* Ele garante que, não importa se o fluxo foi iniciado pelo `inputTest` ou pelo `recebeDadosExternos`, os dados sigam em um único caminho e formato para o restante do processo.\n**🔧 Ação Necessária:** Nenhuma. É um nó de organização.",
+        "height": 340,
+        "width": 220,
+        "color": 6
+      },
+      "id": "3c489836-48a3-4685-b63b-63cd09c886a6",
+      "name": "Sticky Note71",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        688,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "content": "                                           ",
+        "height": 208,
+        "width": 228,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        688,
+        896
+      ],
+      "typeVersion": 1,
+      "id": "f819b8a9-7957-4094-92c1-d2c916836df1",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "                                           ",
+        "height": 208,
+        "width": 228,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        912,
+        896
+      ],
+      "typeVersion": 1,
+      "id": "f8715361-d577-4ed2-aaa4-0ecfb7ad4351",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "chats",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "phone",
+              "keyValue": "={{ $json.telefone }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        976,
+        944
+      ],
+      "id": "f3e6c2c0-0435-4696-a2dd-f510e096a49a",
+      "name": "buscaContexto",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "h9GIgDy4bmSL4nnD",
+          "name": "Supabase Finanzas-app"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "#### *agenteRoteador**\n*_(Tipo: LangChain Agent)_*\n\n**🎯 Objetivo:** O Maestro da Operação.\n\n**📝 Detalhes:**\n* Recebe a mensagem do usuário + o Contexto injetado pelo nó anterior.\n* Seu Prompt foi atualizado para ler esse contexto no início.\n* Ele decide qual ferramenta usar (Clara, Buscador, Agendador, FAQ) mas **todos** os subagentes agora compartilham da mesma memória injetada, evitando perguntas repetitivas.\n\n**🔧 Ação Necessária:** Ajuste o System Message se quiser mudar a lógica de decisão.",
+        "height": 468,
+        "width": 268,
+        "color": 6
+      },
+      "id": "3c4bed39-9777-45fd-a655-6a304f50bee8",
+      "name": "Sticky Note72",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1136,
+        448
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('agrupaDados').item.json.query }}",
+        "options": {
+          "systemMessage": "=# Agente Maestro: Asistente Financiero 🇨🇴\n\nEres un asistente de finanzas personales para familias colombianas. Tu objetivo es ayudar a gestionar ingresos y gastos de forma natural y eficiente.\n\n## Reglas de Interacción:\n- **Idioma**: Siempre responde en **Español**.\n- **Conversación**: Saluda y conversa naturalmente si el usuario solo quiere hablar.\n- **Registro de Gastos/Ingresos**: \n  1. Extrae los datos (monto, descripción, categoría).\n  2. **Obligatorio**: Antes de registrar, apresenta los datos y pregunta: \"¿Confirmas el registro de este [tipo]?\" con el resumen.\n  3. Si el usuario confirma, usa la ferramenta `tool_registrar_transacao`.\n  4. Tras el registro, da una breve **Dica Financiera** basada en la categoría.\n- **Listado**: Si el usuario quiere ver sus gastos, usa `tool_listar_transacciones`.\n- **Edición/Eliminación**: Usa `tool_gestionar_transacciones`. Pede el ID de la transacción si no lo tienes.\n- **Categorías**: Puedes listar, crear o eliminar categorías usando `tooll_categorias`. \n- **Presupuestos (Orçamentos)**: Puedes definir límites por categoría o consultar el estado atual com `tooll_presupuestos`.\n\n## Herramientas disponibles:\n- `tool_registrar_transacao`: Crear nuevos registros.\n- `tool_listar_transacciones`: Ver movimientos recientes.\n- `tool_gestionar_transacciones`: Editar o eliminar registros.\n- `tooll_categorias`: Gestionar (listar/crear/eliminar) categorías de gastos.\n- `tooll_presupuestos`: Gestionar (definir/consultar) metas de gasto por categoría.\n\nSiempre sé amable, usa emojis y mantén el contexto de la familia del usuario."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        1168,
+        944
+      ],
+      "id": "ceb6a278-66eb-4196-863b-93b4802b2954",
+      "name": "agenteRoteador",
+      "notes": "Prompt Atualizado com Gestão de Categorias e Orçamentos"
+    },
+    {
+      "parameters": {
+        "content": "                                           ",
+        "height": 208,
+        "width": 276,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1136,
+        896
+      ],
+      "typeVersion": 1,
+      "id": "b0c4ba2e-b11a-488d-833d-ff92c1a0ad6d",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "content": "                                           ",
+        "height": 208,
+        "width": 308,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1408,
+        896
+      ],
+      "typeVersion": 1,
+      "id": "809f1cb5-175e-4c54-b9b4-2a38f2296a35",
+      "name": "Sticky Note10"
+    },
+    {
+      "parameters": {
+        "content": "#### **gerarNovoContexto**\n*_(Tipo: Basic LLM Chain)_*\n\n**🎯 Objetivo:** O Escriba da Memória.\n\n**📝 Detalhes:**\n* Após a IA responder, este nó entra em ação. Ele não fala com o cliente.\n* Ele pega 3 coisas: O contexto antigo, a nova mensagem do usuário e a resposta que a IA acabou de dar.\n* Usando um prompt especial de \"Motor de Memória\", ele reescreve o resumo do cliente, atualizando dados (ex: mudou de 'quer alugar' para 'quer comprar') e adicionando os fatos recentes.\n\n**🔧 Ação Necessária:** Verifique se o prompt está recebendo os inputs corretos (inputs 1, 2 e 3).\n\n",
+        "height": 468,
+        "width": 300,
+        "color": 6
+      },
+      "id": "b60ac03e-a5bd-43f9-af69-62beb09b364e",
+      "name": "Sticky Note74",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1408,
+        464
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.output }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=Saldos e Hábitos de Consumo"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.5,
+      "position": [
+        1456,
+        944
+      ],
+      "id": "db547f2c-f0c2-4bdc-a540-9f46c27ffa02",
+      "name": "gerarNovoContexto",
+      "notes": "Gera o resumo atualizado"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "chats",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "phone",
+              "condition": "eq",
+              "keyValue": "={{ $('buscaContexto').item.json.phone }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "memoria_contexto",
+              "fieldValue": "={{ $json.text }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1792,
+        944
+      ],
+      "id": "373afa03-39fb-44fc-be97-73a80d41b19f",
+      "name": "atualizaContexto",
+      "credentials": {
+        "supabaseApi": {
+          "id": "h9GIgDy4bmSL4nnD",
+          "name": "Supabase Finanzas-app"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "#### **atualizaContexto**\n*_(Tipo: Supabase Update)_*\n\n**🎯 Objetivo:** Persistência de Dados.\n\n**📝 Detalhes:**\n* Pega o novo resumo gerado pelo nó anterior e salva (sobrescreve) na coluna `memoria_contexto` do cliente no banco de dados.\n* Isso garante que na próxima mensagem, o fluxo recomece com as informações mais frescas possíveis.\n\n**🔧 Ação Necessária:** Garanta que o filtro esteja usando o telefone correto para atualizar a linha certa.\n",
+        "height": 452,
+        "width": 236,
+        "color": 6
+      },
+      "id": "fc7f2728-127b-42b9-8704-6123976d606f",
+      "name": "Sticky Note75",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1712,
+        448
+      ]
+    },
+    {
+      "parameters": {
+        "content": "                                           ",
+        "height": 208,
+        "width": 244,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1712,
+        896
+      ],
+      "typeVersion": 1,
+      "id": "e90d62ec-e0e6-4047-9512-a4ec66deabc8",
+      "name": "Sticky Note11"
+    },
+    {
+      "parameters": {
+        "content": "                                           ",
+        "height": 208,
+        "width": 244,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1952,
+        896
+      ],
+      "typeVersion": 1,
+      "id": "39951442-719d-4372-ad13-088c95968d36",
+      "name": "Sticky Note12"
+    },
+    {
+      "parameters": {
+        "content": "                                           ",
+        "height": 416,
+        "width": 150,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1120,
+        1152
+      ],
+      "typeVersion": 1,
+      "id": "ddf13109-0a56-428b-bc02-a842a4538f39",
+      "name": "Sticky Note13"
+    },
+    {
+      "parameters": {
+        "content": "#### **openai4.1Mini**\n*_(Tipo: ChatOpenAI)_*\n**🎯 Objetivo:** Conectar o cérebro da operação, o modelo de linguagem da OpenAI.\n**📝 Detalhes:**\n* Este nó representa o modelo de IA (GPT-4.1 Mini) que irá interpretar os prompts e gerar as respostas.\n* Ele está conectado a todos os agentes, fornecendo a capacidade de \"pensar\".\n**🔧 Ação Necessária:** **CRÍTICO!** Você **deve** selecionar sua própria credencial da OpenAI aqui. Clique no nó, vá em \"Credential\" e escolha a sua chave de API da OpenAI.",
+        "height": 420,
+        "width": 284,
+        "color": 6
+      },
+      "id": "4b600133-cb18-47bd-8243-6ef63824c632",
+      "name": "Sticky Note76",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        832,
+        1152
+      ]
+    },
+    {
+      "parameters": {
+        "content": "                                           ",
+        "height": 416,
+        "width": 150,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1280,
+        1152
+      ],
+      "typeVersion": 1,
+      "id": "0fa2cde6-a435-4748-9482-f02e3cceeee3",
+      "name": "Sticky Note15"
+    },
+    {
+      "parameters": {
+        "content": "#### **memoriaSimples**\n*_(Tipo: Buffer Window Memory)_*\n**🎯 Objetivo:** Dar ao chatbot a capacidade de lembrar da conversa.\n**📝 Detalhes:**\n* Este nó armazena um histórico das últimas interações (definido em `Context Window Length`).\n* A memória é vinculada a um `sessionKey` (`identifier`), garantindo que a IA lembre o contexto de cada usuário de forma separada.\n**🔧 Ação Necessária:** Você pode ajustar o `Context Window Length`. Um valor maior (ex: 5) permite que a IA lembre de mais mensagens passadas, mas consome mais tokens. O valor padrão é um bom começo.",
+        "height": 420,
+        "width": 284,
+        "color": 6
+      },
+      "id": "2a5a4e93-8fbc-4af0-93c0-9d6613e750fe",
+      "name": "Sticky Note77",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1424,
+        1152
+      ]
+    },
+    {
+      "parameters": {
+        "content": "#### **devolveResposta**\n*_(Tipo: Set)_*\n\n**🎯 Objetivo:** Preparar e isolar a resposta final para o usuário.\n\n**📝 Detalhes:**\n* Este nó atua como um \"filtro de saída\". Ele ignora todos os cálculos complexos de memória e banco de dados que aconteceram antes e pega **apenas** a mensagem de texto final gerada pela IA (`output`).\n* É essencial para garantir que o seu webhook (WhatsApp/API) receba apenas a resposta limpa da Clara ou dos especialistas, sem códigos ou JSONs técnicos misturados.\n\n**🔧 Ação Necessária:** Nenhuma configuração complexa, apenas certifique-se de que a expressão está puxando o `output` do nó `agente_roteador`.",
+        "height": 548,
+        "width": 252,
+        "color": 6
+      },
+      "id": "fcbe19d6-eb53-4d39-aea5-3d1e16c9e58d",
+      "name": "Sticky Note78",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1952,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1152,
+        1296
+      ],
+      "id": "856a4943-b49e-424a-bd8b-8537fc0abab5",
+      "name": "openai4.o-Mini",
+      "credentials": {
+        "openAiApi": {
+          "id": "kzsagMP6DxHMcdAf",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6926c33c-7690-47c4-8a2c-3c7ee431112c",
+              "name": "output",
+              "value": "={{ $('agrupaDados').item.json.telefone }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2704,
+        928
+      ],
+      "id": "547d3476-2c57-4986-9434-64ec624c0be9",
+      "name": "devolveResposta1"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "IaFwqV3iZrLdKUpq",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/IaFwqV3iZrLdKUpq",
+          "cachedResultName": "tool_registrar_transacao"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "telefone": "={{ $json.telefone }}",
+            "identifier": "={{ $json.identifier }}",
+            "query": "={{ $json.query }}",
+            "memoria_contexto": "={{ $json.memoria_contexto }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "query",
+              "displayName": "query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "identifier",
+              "displayName": "identifier",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "telefone",
+              "displayName": "telefone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "memoria_contexto",
+              "displayName": "memoria_contexto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "mode": "each",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        2256,
+        944
+      ],
+      "id": "54d59fca-daa3-45c4-b0e4-9dc4142d4e3a",
+      "name": "tooll_agente_registro"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "JJ5zPa8vzEf8pX4p",
+          "mode": "list",
+          "cachedResultName": "tool_listar_transacciones"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "telefone": "={{ $('trataDados').first().json.telefone }}",
+            "limite": "={{ $json.limite }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "limite",
+              "displayName": "limite",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        2256,
+        1100
+      ],
+      "id": "tool_listar_node_id",
+      "name": "tool_listar"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "0NHLe7aFIZJZUUYc",
+          "mode": "list",
+          "cachedResultName": "tool_gestionar_transacciones"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "action": "={{ $json.action }}",
+            "transaccion_id": "={{ $json.transaccion_id }}",
+            "telefone": "={{ $('trataDados').first().json.telefone }}",
+            "monto": "={{ $json.monto }}",
+            "descripcion": "={{ $json.descripcion }}",
+            "categoria": "={{ $json.categoria }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "action",
+              "displayName": "action",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "transaccion_id",
+              "displayName": "transaccion_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "monto",
+              "displayName": "monto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number",
+              "removed": false
+            },
+            {
+              "id": "descripcion",
+              "displayName": "descripcion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "categoria",
+              "displayName": "categoria",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        2256,
+        1250
+      ],
+      "id": "tool_gestionar_node_id",
+      "name": "tool_gestionar"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "LxA96I9jSGlz5sNV",
+          "mode": "list",
+          "cachedResultName": "tool_gestionar_categorias"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "action": "={{ $json.action }}",
+            "nombre": "={{ $json.nombre }}",
+            "categoria_id": "={{ $json.categoria_id }}",
+            "telefone": "={{ $('trataDados').first().json.telefone }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "action",
+              "displayName": "action",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "nombre",
+              "displayName": "nombre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "categoria_id",
+              "displayName": "categoria_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        2256,
+        1400
+      ],
+      "id": "tool_categorias_node_id",
+      "name": "tooll_categorias"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "yHWHPQqXDA5Wt61c",
+          "mode": "list",
+          "cachedResultName": "tool_gestionar_presupuestos"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "action": "={{ $json.action }}",
+            "categoria": "={{ $json.categoria }}",
+            "monto_limite": "={{ $json.monto_limite }}",
+            "mes_anio": "={{ $json.mes_anio }}",
+            "telefone": "={{ $('trataDados').first().json.telefone }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "action",
+              "displayName": "action",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "categoria",
+              "displayName": "categoria",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "monto_limite",
+              "displayName": "monto_limite",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number",
+              "removed": false
+            },
+            {
+              "id": "mes_anio",
+              "displayName": "mes_anio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        2256,
+        1550
+      ],
+      "id": "tool_presupuestos_node_id",
+      "name": "tooll_presupuestos"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d3a098ee-fc41-4707-9f35-7d9f0c97fb8e",
+              "name": "telefone",
+              "value": "={{ $json.phone }}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2000,
+        944
+      ],
+      "id": "d3a098ee-fc41-4707-9f35-7d9f0c97fb8e",
+      "name": "Edit Fields"
+    }
+  ],
+  "pinData": {
+    "recebeDadosExternos": [
+      {
+        "json": {
+          "query": "Buenas noches Buenas noches",
+          "identifier": "115bb3c0-387d-4efa-a74c-278c70a2edbf",
+          "telefone": "573138310085@s.whatsapp.net"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "inputTest": {
+      "main": [
+        [
+          {
+            "node": "trataDados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "trataDados": {
+      "main": [
+        [
+          {
+            "node": "agrupaDados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "recebeDadosExternos": {
+      "main": [
+        [
+          {
+            "node": "agrupaDados",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "agrupaDados": {
+      "main": [
+        [
+          {
+            "node": "buscaContexto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "agenteRoteador",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "buscaContexto": {
+      "main": [
+        [
+          {
+            "node": "agenteRoteador",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "agenteRoteador": {
+      "main": [
+        [
+          {
+            "node": "gerarNovoContexto",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [],
+        [
+          {
+            "node": "tooll_agente_registro",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "tool_listar",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "tool_gestionar",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "tooll_categorias",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "tooll_presupuestos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "gerarNovoContexto": {
+      "main": [
+        [
+          {
+            "node": "atualizaContexto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "atualizaContexto": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "openai4.o-Mini": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "agenteRoteador",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "gerarNovoContexto",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "devolveResposta1": {
+      "main": [
+        []
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "75528127-89bf-4856-9d05-94466bd0e66a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2d95b1aca089927f59c112cbbdc75fb2a50ddc6e274de720078481e17950344f"
+  },
+  "id": "rbmqrCg247jtTDOg",
+  "tags": []
+}

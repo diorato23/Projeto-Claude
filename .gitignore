@@ -1,0 +1,29 @@
+# Cursor / local tooling
+.agent/
+.cursor/
+
+# Node / Next artifacts
+**/node_modules/
+**/.next/
+**/out/
+**/dist/
+**/.turbo/
+**/*.tsbuildinfo
+
+# Playwright artifacts
+**/playwright-report/
+**/test-results/
+
+# Logs
+**/*.log
+
+# OS / editor
+desktop.ini
+Thumbs.db
+.DS_Store
+
+# Local temp scripts
+tmp_*.js
+
+# This directory is its own Git repository; keep it separate
+finanzas-app/

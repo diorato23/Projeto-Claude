@@ -1,0 +1,143 @@
+{
+  "name": "tool_gestionar_categorias",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "action"
+            },
+            {
+              "name": "nombre"
+            },
+            {
+              "name": "categoria_id"
+            },
+            {
+              "name": "telefone"
+            }
+          ]
+        }
+      },
+      "id": "e1f2g3h4-i5j6-k7l8-m9n0-o1p2q3r4s5t6",
+      "name": "receberDadosExterno",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        380,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://bolsillo.ktuche.com/api/webhook/categorias",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "keypair",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "action",
+              "value": "={{ $json.action || \"listar\" }}"
+            },
+            {
+              "name": "nombre",
+              "value": "={{ $json.nombre || \"\" }}"
+            },
+            {
+              "name": "categoria_id",
+              "value": "={{ $json.categoria_id || \"\" }}"
+            },
+            {
+              "name": "whatsapp",
+              "value": "={{ $json.telefone ? $json.telefone.replace('@s.whatsapp.net', '') : \"\" }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f2g3h4i5-j6k7-l8m9-n0o1-p2q3r4s5t6u7",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        600,
+        240
+      ],
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "R1qKKa1g1IqG8OAo",
+          "name": "Whatsapp Bearer Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const resposta = $input.first().json;\nconst acao = $node[\"receberDadosExterno\"].json.action || 'listar';\n\nif (resposta.success) {\n  if (acao === 'listar') {\n    const lista = resposta.categorias.map(c => `• ${c.nombre} (ID: \\`${c.id}\\`)`).join('\\n');\n    return [{ json: { mensagem: `📂 *Tus Categorías:*\\n\\n${lista || 'No tienes categorías personalizadas.'}` }}];\n  }\n  return [{ json: { mensagem: resposta.message || \"✅ Operación completada\" }}];\n}\n\nreturn [{ json: { mensagem: `❌ *Error:* ${resposta.error || 'Desconhecido'}` }}];"
+      },
+      "id": "g3h4i5j6-k7l8-m9n0-o1p2-q3r4s5t6u7v8",
+      "name": "Formatar Resposta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1.2,
+      "position": [
+        820,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "h4i5j6k7-l8m9-n0o1-p2q3-r4s5t6u7v8w9",
+      "name": "Retorno Final",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1040,
+        240
+      ]
+    }
+  ],
+  "connections": {
+    "receberDadosExterno": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Formatar Resposta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatar Resposta": {
+      "main": [
+        [
+          {
+            "node": "Retorno Final",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

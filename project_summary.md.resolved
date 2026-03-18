@@ -1,0 +1,76 @@
+# 📝 Status do Projeto: Finanzas App
+
+Este documento resume o estado atual do projeto `finanzas-app`, identificando o que já foi construído, as tecnologias utilizadas e o caminho para torná-lo uma aplicação de alto nível (ponta).
+
+## 🚀 Tecnologias Principais
+
+O projeto utiliza uma stack extremamente moderna (Bleeding Edge):
+
+- **Frontend/Framework**: [Next.js 15/16](https://nextjs.org/) com App Router.
+- **Linguagem**: [TypeScript](https://www.typescriptlang.org/).
+- **UI & Estilização**: [Tailwind CSS 4](https://tailwindcss.com/), [Shadcn UI](https://ui.shadcn.com/) e [Radix UI](https://www.radix-ui.com/).
+- **Ícones**: [Lucide React](https://lucide.dev/).
+- **Backend/Banco de Dados**: [Supabase](https://supabase.com/) (Auth, Database, SSR).
+- **Gráficos**: [Recharts](https://recharts.org/).
+- **Formulários**: [React Hook Form](https://react-hook-form.com/) + [Zod](https://zod.dev/).
+- **Testes**: [Playwright](https://playwright.dev/) (E2E).
+- **Infraestrutura**: [Docker](https://www.docker.com/) & [GitHub Actions](https://github.com/features/actions).
+
+---
+
+## ✅ O que já está feito
+
+1.  **Arquitetura Base**: Estrutura robusta utilizando o padrão `src/app`.
+2.  **Autenticação**: Fluxo completo de Login e Proteção de Rotas via Middleware com Supabase.
+3.  **Dashboard**: Visão geral com cartões de sumário e gráficos iniciais.
+4.  **Gestão de Transações**: Interface para listagem e edição de transações.
+5.  **Categorias & Orçamentos**: Estrutura para gerenciar categorias financeiras e limites de gastos.
+6.  **Relatórios (Informes)**: Seção para análise visual de dados.
+7.  **Responsividade**: Layout adaptável com `App Sidebar` para desktop e `Bottom Nav` para mobile.
+8.  **Dark/Light Mode**: Suporte nativo a temas.
+9.  **Identidade Visual (PWA)**: Novo logo premium e ícones gerados por IA.
+10. **Configuração PWA**: Manifest e metadados configurados para instalação mobile.
+11. **Containerização**: Pronto para deploy com Docker.
+
+---
+
+## 🔑 Credenciais de Acesso (Desenvolvimento)
+
+- **Admin de Teste**: `admin@test.com`
+- **Senha**: `admin123456`
+
+---
+
+## 🛠️ O que falta para ser um App de "Ponta"
+
+Para atingir o próximo nível e se destacar no mercado, recomendo focar nos seguintes pontos:
+
+### 1. Experiência do Usuário (UX/UI)
+- **Animações Fluidas**: Implementar `Framer Motion` para transições de página e feedback visual ao interagir com gráficos.
+- **Skeleton Screens**: Substituir loaders genéricos por skeletons que imitam a estrutura da página durante o carregamento.
+- **Micro-interações**: Adicionar sons sutis ou haptics (para mobile) e feedbacks visuais em botões e inputs.
+
+### 2. Funcionalidades Avançadas
+- **PWA (Progressive Web App)**: Implementar Service Workers para modo offline (Passo 3).
+- **Exportação de Dados**: Gerar relatórios em PDF/CSV de forma profissional.
+- **Notificações Push**: Alertas de gastos excessivos ou lembretes de contas a pagar.
+- **Multimoeda**: Conversão automática e suporte a múltiplas moedas.
+
+### 3. Inteligência & Dados
+- **Categorização Automática via IA**: Usar a SDK da Vercel (AI) para sugerir categorias baseadas na descrição da transação.
+- **Previsão de Gastos**: Gráficos preditivos que mostram quanto o usuário gastará até o fim do mês com base no histórico.
+
+### 4. Robustez & Performance
+- **Auditoria de Acessibilidade (A11y)**: Garantir que o app seja 100% navegável por teclado e leitores de tela.
+- **Otimização de Performance**: Revisar "waterfalls" de dados e garantir Core Web Vitals excelentes.
+- **Tratamento de Erros Global**: Implementar `Error Boundaries` e notificações (Toast) elegantes para falhas de rede.
+
+---
+
+## 🔝 Próximos Passos Sugeridos
+
+3. Configuração de PWA: Metadados, Manifesto e Ícones concluídos.
+4. Modo Offline (Service Worker): Implementado e sincronizado.
+
+> [!IMPORTANT]
+> **Nota de Deploy (VPS):** Para que o PWA e o modo offline funcionem na sua VPS, é obrigatório que o site seja servido via **HTTPS**. Isso requer um domínio e um certificado SSL (ex: Let's Encrypt). O código atual já está pronto para isso.
