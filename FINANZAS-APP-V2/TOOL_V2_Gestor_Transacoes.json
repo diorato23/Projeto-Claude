@@ -1,0 +1,168 @@
+{
+  "name": "TOOL_V2_Gestor_Transacoes",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            { "name": "query", "type": "string" },
+            { "name": "telefone", "type": "string" }
+          ]
+        }
+      },
+      "id": "d1a2b3c4-d5e6-4f7a-8b9c-600000000001",
+      "name": "receberDadosExterno",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [280, 240]
+    },
+    {
+      "parameters": {
+        "jsCode": "var query = ($json.query || '').trim();\nvar queryLower = query.toLowerCase();\nvar telefone = ($json.telefone || '').replace('@s.whatsapp.net', '');\n\nvar action = 'eliminar';\n\nif (queryLower.indexOf('editar') > -1 || queryLower.indexOf('cambiar') > -1 || queryLower.indexOf('alterar') > -1 || queryLower.indexOf('mudar') > -1 || queryLower.indexOf('update') > -1 || queryLower.indexOf('modificar') > -1) {\n  action = 'editar';\n}\n\nvar stopWords = ['editar','cambiar','alterar','mudar','update','modificar','eliminar','borrar','quitar','excluir','apagar','delete','remove','remover','transaccion','transacao','gasto','ingreso','la','el','una','un','de','por','para','favor','puede','puedes','quero','quiero','valor','monto','precio'];\n\nvar words = queryLower.replace(/[?!.,;:$]/g, '').split(/\\s+/);\nvar significant = [];\nvar nuevoMonto = 0;\n\nfor (var i = 0; i < words.length; i++) {\n  var num = parseFloat(words[i]);\n  if (!isNaN(num) && num > 0) {\n    nuevoMonto = num;\n  } else if (words[i].length > 1 && stopWords.indexOf(words[i]) === -1) {\n    significant.push(words[i]);\n  }\n}\n\nvar searchTerm = '';\nfor (var j = 0; j < significant.length; j++) {\n  var w = significant[j];\n  searchTerm += w.charAt(0).toUpperCase() + w.slice(1);\n  if (j < significant.length - 1) searchTerm += ' ';\n}\n\nreturn [{ json: { action: action, searchTerm: searchTerm, nuevoMonto: nuevoMonto, telefone: telefone } }];"
+      },
+      "id": "d1a2b3c4-d5e6-4f7a-8b9c-600000000002",
+      "name": "Parsear Query",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [480, 240]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://bolsillo.ktuche.com/api/webhook/transacciones",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "keypair",
+        "bodyParameters": {
+          "parameters": [
+            { "name": "action", "value": "listar" },
+            { "name": "whatsapp", "value": "={{ $json.telefone }}" },
+            { "name": "limite", "value": "20" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d1a2b3c4-d5e6-4f7a-8b9c-600000000003",
+      "name": "Buscar Transacciones (API)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [680, 240],
+      "onError": "continue",
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "R1qKKa1g1IqG8OAo",
+          "name": "Whatsapp Bearer Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "var parsed = $node['Parsear Query'].json;\nvar resposta = $input.first().json;\nvar action = parsed.action;\nvar transacciones = resposta.transacciones || [];\nvar searchTerm = (parsed.searchTerm || '').toLowerCase();\n\nfunction normalize(str) {\n  return (str || '').toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '');\n}\n\nvar searchNorm = normalize(searchTerm);\n\nif (!searchTerm) {\n  return [{ json: { skip: true, mensagem: '⚠️ Necesito saber cuál transacción. Ejemplo: eliminar Pizza' } }];\n}\n\nvar match = null;\nfor (var i = 0; i < transacciones.length; i++) {\n  var descNorm = normalize(transacciones[i].descripcion);\n  if (descNorm.indexOf(searchNorm) > -1) {\n    match = transacciones[i];\n    break;\n  }\n}\n\nif (!match) {\n  return [{ json: { skip: true, mensagem: '🔍 No encontré \"' + parsed.searchTerm + '\" en tus transacciones recientes.' } }];\n}\n\nif (action === 'eliminar') {\n  return [{ json: { skip: false, action: 'eliminar', transaccion_id: match.id, nombre: match.descripcion, telefone: parsed.telefone } }];\n}\n\nif (action === 'editar') {\n  if (!parsed.nuevoMonto || parsed.nuevoMonto <= 0) {\n    return [{ json: { skip: true, mensagem: '⚠️ Encontré \"' + match.descripcion + '\" (actual: $' + match.monto + '). Necesito el nuevo valor. Ejemplo: editar Pizza 25000' } }];\n  }\n  return [{ json: { skip: false, action: 'editar', transaccion_id: match.id, monto: parsed.nuevoMonto, nombre: match.descripcion, telefone: parsed.telefone } }];\n}\n\nreturn [{ json: { skip: true, mensagem: '⚠️ Usa: eliminar [nombre], editar [nombre] [nuevo valor]' } }];"
+      },
+      "id": "d1a2b3c4-d5e6-4f7a-8b9c-600000000004",
+      "name": "Encontrar Transaccion",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [880, 240]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "precisa-acao-trans",
+              "leftValue": "={{ String($json.skip) }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "d1a2b3c4-d5e6-4f7a-8b9c-600000000005",
+      "name": "Precisa Executar?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1080, 240]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://bolsillo.ktuche.com/api/webhook/transacciones",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "keypair",
+        "bodyParameters": {
+          "parameters": [
+            { "name": "action", "value": "={{ $json.action }}" },
+            { "name": "transaccion_id", "value": "={{ $json.transaccion_id || '' }}" },
+            { "name": "monto", "value": "={{ $json.monto || '' }}" },
+            { "name": "whatsapp", "value": "={{ $json.telefone }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d1a2b3c4-d5e6-4f7a-8b9c-600000000006",
+      "name": "Executar Acao (API)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1300, 160],
+      "onError": "continue",
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "R1qKKa1g1IqG8OAo",
+          "name": "Whatsapp Bearer Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "var resposta = $input.first().json;\n\nif (resposta.mensagem) {\n  return [{ json: { success: true, message: resposta.mensagem } }];\n}\n\nif (resposta.success) {\n  return [{ json: { success: true, message: resposta.message || '✅ Operación completada.' } }];\n}\n\nreturn [{ json: { success: false, message: '❌ Error: ' + (resposta.error || 'Algo salió mal.') } }];"
+      },
+      "id": "d1a2b3c4-d5e6-4f7a-8b9c-600000000007",
+      "name": "Formatar Resposta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [1500, 240]
+    }
+  ],
+  "connections": {
+    "receberDadosExterno": {
+      "main": [[{ "node": "Parsear Query", "type": "main", "index": 0 }]]
+    },
+    "Parsear Query": {
+      "main": [[{ "node": "Buscar Transacciones (API)", "type": "main", "index": 0 }]]
+    },
+    "Buscar Transacciones (API)": {
+      "main": [[{ "node": "Encontrar Transaccion", "type": "main", "index": 0 }]]
+    },
+    "Encontrar Transaccion": {
+      "main": [[{ "node": "Precisa Executar?", "type": "main", "index": 0 }]]
+    },
+    "Precisa Executar?": {
+      "main": [
+        [{ "node": "Executar Acao (API)", "type": "main", "index": 0 }],
+        [{ "node": "Formatar Resposta", "type": "main", "index": 0 }]
+      ]
+    },
+    "Executar Acao (API)": {
+      "main": [[{ "node": "Formatar Resposta", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" }
+}

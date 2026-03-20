@@ -1,0 +1,167 @@
+{
+  "name": "TOOL_V2_Gestor_Categorias",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            { "name": "query", "type": "string" },
+            { "name": "telefone", "type": "string" }
+          ]
+        }
+      },
+      "id": "b1a2c3d4-e5f6-4a1b-9c2d-400000000001",
+      "name": "receberDadosExterno",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [280, 240]
+    },
+    {
+      "parameters": {
+        "jsCode": "var query = ($json.query || '').trim();\nvar queryLower = query.toLowerCase();\nvar telefone = ($json.telefone || '').replace('@s.whatsapp.net', '');\n\nvar action = 'listar';\n\nif (queryLower.indexOf('crear') > -1 || queryLower.indexOf('criar') > -1 || queryLower.indexOf('agregar') > -1 || queryLower.indexOf('nueva') > -1 || queryLower.indexOf('nova') > -1 || queryLower.indexOf('adicionar') > -1 || queryLower.indexOf('add') > -1) {\n  action = 'crear';\n} else if (queryLower.indexOf('eliminar') > -1 || queryLower.indexOf('borrar') > -1 || queryLower.indexOf('excluir') > -1 || queryLower.indexOf('apagar') > -1 || queryLower.indexOf('delete') > -1 || queryLower.indexOf('remover') > -1 || queryLower.indexOf('deletar') > -1) {\n  action = 'eliminar';\n}\n\nvar stopWords = ['crear','criar','agregar','nueva','nuevo','novo','nova','adicionar','add','eliminar','borrar','excluir','apagar','delete','remover','deletar','categoria','categorias','categoría','categorías','la','el','una','um','uma','un','de','por','favor','puede','puedes','listar','ver','mostrar','mis','meus','minhas','quero','quiero','nome','nombre','então','entonces','entao'];\n\nvar words = queryLower.replace(/[?!.,;:]/g, '').split(/\\s+/);\nvar significant = [];\nfor (var i = 0; i < words.length; i++) {\n  if (words[i].length > 1 && stopWords.indexOf(words[i]) === -1) {\n    significant.push(words[i]);\n  }\n}\n\nvar nombre = '';\nfor (var j = 0; j < significant.length; j++) {\n  var w = significant[j];\n  nombre += w.charAt(0).toUpperCase() + w.slice(1);\n  if (j < significant.length - 1) nombre += ' ';\n}\n\nreturn [{ json: { action: action, nombre: nombre, telefone: telefone } }];"
+      },
+      "id": "b1a2c3d4-e5f6-4a1b-9c2d-400000000002",
+      "name": "Parsear Query",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [480, 240]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://bolsillo.ktuche.com/api/webhook/categorias",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "keypair",
+        "bodyParameters": {
+          "parameters": [
+            { "name": "action", "value": "listar" },
+            { "name": "whatsapp", "value": "={{ $json.telefone }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b1a2c3d4-e5f6-4a1b-9c2d-400000000003",
+      "name": "Buscar Categorias (API)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [680, 240],
+      "onError": "continue",
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "R1qKKa1g1IqG8OAo",
+          "name": "Whatsapp Bearer Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "var parsed = $node['Parsear Query'].json;\nvar resposta = $input.first().json;\nvar action = parsed.action;\nvar categorias = resposta.categorias || [];\n\nif (action === 'listar') {\n  if (categorias.length === 0) {\n    return [{ json: { skip: true, mensagem: '📂 No tienes categorías creadas todavía.' } }];\n  }\n  var lista = '';\n  for (var i = 0; i < categorias.length; i++) {\n    lista += '• ' + categorias[i].nombre + '\\n';\n  }\n  return [{ json: { skip: true, mensagem: '📂 *Tus Categorías:*\\n\\n' + lista.trim() } }];\n}\n\nif (action === 'crear') {\n  if (!parsed.nombre) {\n    return [{ json: { skip: true, mensagem: '⚠️ Necesito el nombre. Ejemplo: crear categoría Supermercado' } }];\n  }\n  return [{ json: { skip: false, action: 'crear', nombre: parsed.nombre, telefone: parsed.telefone } }];\n}\n\nif (action === 'eliminar') {\n  var searchName = (parsed.nombre || '').toLowerCase();\n  var match = null;\n  for (var j = 0; j < categorias.length; j++) {\n    if (categorias[j].nombre && categorias[j].nombre.toLowerCase().indexOf(searchName) > -1) {\n      match = categorias[j];\n      break;\n    }\n  }\n  if (!match) {\n    var lista2 = '';\n    for (var k = 0; k < categorias.length; k++) {\n      lista2 += '• ' + categorias[k].nombre + '\\n';\n    }\n    return [{ json: { skip: true, mensagem: '🔍 No encontré \"' + parsed.nombre + '\". Categorías disponibles:\\n\\n' + (lista2.trim() || 'Ninguna') } }];\n  }\n  return [{ json: { skip: false, action: 'eliminar', categoria_id: match.id, nombre: match.nombre, telefone: parsed.telefone } }];\n}\n\nreturn [{ json: { skip: true, mensagem: '⚠️ Usa: ver categorías, crear categoría X, eliminar categoría X' } }];"
+      },
+      "id": "b1a2c3d4-e5f6-4a1b-9c2d-400000000004",
+      "name": "Processar Resultado",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [880, 240]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "precisa-acao-check",
+              "leftValue": "={{ String($json.skip) }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "b1a2c3d4-e5f6-4a1b-9c2d-400000000005",
+      "name": "Precisa Executar?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1080, 240]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://bolsillo.ktuche.com/api/webhook/categorias",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "keypair",
+        "bodyParameters": {
+          "parameters": [
+            { "name": "action", "value": "={{ $json.action }}" },
+            { "name": "nombre", "value": "={{ $json.nombre || '' }}" },
+            { "name": "categoria_id", "value": "={{ $json.categoria_id || '' }}" },
+            { "name": "whatsapp", "value": "={{ $json.telefone }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b1a2c3d4-e5f6-4a1b-9c2d-400000000006",
+      "name": "Executar Acao (API)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1300, 160],
+      "onError": "continue",
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "R1qKKa1g1IqG8OAo",
+          "name": "Whatsapp Bearer Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "var resposta = $input.first().json;\n\nif (resposta.mensagem) {\n  return [{ json: { success: true, message: resposta.mensagem } }];\n}\n\nif (resposta.success) {\n  return [{ json: { success: true, message: resposta.message || '✅ Operación completada.' } }];\n}\n\nreturn [{ json: { success: false, message: '❌ Error: ' + (resposta.error || 'Algo salió mal.') } }];"
+      },
+      "id": "b1a2c3d4-e5f6-4a1b-9c2d-400000000007",
+      "name": "Formatar Resposta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [1500, 240]
+    }
+  ],
+  "connections": {
+    "receberDadosExterno": {
+      "main": [[{ "node": "Parsear Query", "type": "main", "index": 0 }]]
+    },
+    "Parsear Query": {
+      "main": [[{ "node": "Buscar Categorias (API)", "type": "main", "index": 0 }]]
+    },
+    "Buscar Categorias (API)": {
+      "main": [[{ "node": "Processar Resultado", "type": "main", "index": 0 }]]
+    },
+    "Processar Resultado": {
+      "main": [[{ "node": "Precisa Executar?", "type": "main", "index": 0 }]]
+    },
+    "Precisa Executar?": {
+      "main": [
+        [{ "node": "Executar Acao (API)", "type": "main", "index": 0 }],
+        [{ "node": "Formatar Resposta", "type": "main", "index": 0 }]
+      ]
+    },
+    "Executar Acao (API)": {
+      "main": [[{ "node": "Formatar Resposta", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" }
+}

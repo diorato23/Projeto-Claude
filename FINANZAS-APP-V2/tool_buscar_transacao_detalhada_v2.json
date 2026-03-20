@@ -1,0 +1,84 @@
+{
+  "name": "tool_buscar_transacao_detalhada",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            { "name": "query" },
+            { "name": "telefone" }
+          ]
+        }
+      },
+      "id": "bdd10001-aaaa-4aaa-aaaa-aaaaaaaaa001",
+      "name": "receberDadosExterno",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [380, 240]
+    },
+    {
+      "parameters": {
+        "jsCode": "const query = ($json.query || '').trim();\nconst telefone = ($json.telefone || '').replace('@s.whatsapp.net', '');\n\n// Stop words PT + ES + comandos comuns\nconst ignore = [\n  'quero','apagar','excluir','deletar','buscar','encontrar',\n  'pode','mostrar','listar','ver','editar','mudar','alterar',\n  'registro','registros','transação','transacao','gasto','gastos',\n  'quiere','quiero','borrar','eliminar','puede','puedes',\n  'la','el','un','una','los','las','de','del','para','por',\n  'con','que','ese','esa','este','esta','como','mis',\n  'o','a','os','as','do','da','dos','das','no','na',\n  'nos','nas','em','com','meu','meus','minha','minhas'\n];\n\n// Extrai palavras significativas\nlet words = query.toLowerCase()\n  .replace(/[?!.,;:'\"()\\-]/g, '')\n  .split(/\\s+/)\n  .filter(word => word.length > 1 && !ignore.includes(word));\n\nlet cleanQuery = words.join(' ');\n\n// Fallback: última palavra significativa\nif (!cleanQuery) {\n  const originalWords = query.toLowerCase()\n    .replace(/[?!.,;:'\"()\\-]/g, '')\n    .split(/\\s+/)\n    .filter(w => w.length > 2);\n  cleanQuery = originalWords[originalWords.length - 1] || query.trim();\n}\n\nreturn [{\n  json: {\n    searchTerm: cleanQuery,\n    originalQuery: query,\n    telefone: telefone\n  }\n}];"
+      },
+      "id": "bdd10001-aaaa-4aaa-aaaa-aaaaaaaaa002",
+      "name": "Parsear Query",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1.2,
+      "position": [580, 240]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://bolsillo.ktuche.com/api/webhook/transacciones",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "keypair",
+        "bodyParameters": {
+          "parameters": [
+            { "name": "action", "value": "listar" },
+            { "name": "whatsapp", "value": "={{ $json.telefone }}" },
+            { "name": "limite", "value": "20" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bdd10001-aaaa-4aaa-aaaa-aaaaaaaaa003",
+      "name": "Buscar Transacciones",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [800, 240],
+      "onError": "continue",
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "R1qKKa1g1IqG8OAo",
+          "name": "Whatsapp Bearer Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const parsed = $node['Parsear Query'].json;\nconst resposta = $input.first().json;\nconst searchTerm = (parsed.searchTerm || '').toLowerCase();\n\nconst transacciones = resposta.transacciones || [];\n\nif (transacciones.length === 0) {\n  return [{ json: {\n    success: true,\n    message: `🔍 No encontré transacciones para tu familia.`\n  }}];\n}\n\n// Busca case-insensitive + sem acentos\nfunction normalize(str) {\n  return (str || '').toLowerCase()\n    .normalize('NFD')\n    .replace(/[\\u0300-\\u036f]/g, '');\n}\n\nconst searchNorm = normalize(searchTerm);\n\n// Filtra por descrição OU categoria\nconst matches = transacciones.filter(t => {\n  const desc = normalize(t.descripcion);\n  const cat = normalize(t.categoria);\n  return desc.includes(searchNorm) || cat.includes(searchNorm);\n});\n\nif (matches.length === 0) {\n  return [{ json: {\n    success: true,\n    message: `🔍 No encontré transacciones que coincidan con \"${parsed.searchTerm}\".\\n\\nTus últimas transacciones son:\\n${resposta.message || '(ninguna)'}`\n  }}];\n}\n\nlet msg = `🔍 *Encontré ${matches.length} transaccion(es):*\\n\\n`;\nmatches.slice(0, 5).forEach(t => {\n  const emoji = t.tipo === 'pago' ? '📉' : '📈';\n  const monto = Number(t.monto).toLocaleString('es-CO');\n  msg += `${emoji} *${t.descripcion}*\\n💰 $${monto} | 📂 ${t.categoria}\\n🆔 \\`${t.id}\\`\\n\\n`;\n});\n\nreturn [{ json: {\n  success: true,\n  message: msg.trim(),\n  data: matches.slice(0, 5)\n}}];"
+      },
+      "id": "bdd10001-aaaa-4aaa-aaaa-aaaaaaaaa004",
+      "name": "Filtrar e Formatar",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1.2,
+      "position": [1020, 240]
+    }
+  ],
+  "connections": {
+    "receberDadosExterno": {
+      "main": [[{ "node": "Parsear Query", "type": "main", "index": 0 }]]
+    },
+    "Parsear Query": {
+      "main": [[{ "node": "Buscar Transacciones", "type": "main", "index": 0 }]]
+    },
+    "Buscar Transacciones": {
+      "main": [[{ "node": "Filtrar e Formatar", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" }
+}

@@ -1,0 +1,167 @@
+{
+  "name": "TOOL_V2_Gestor_Presupuestos",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            { "name": "query", "type": "string" },
+            { "name": "telefone", "type": "string" }
+          ]
+        }
+      },
+      "id": "c1a2b3c4-d5e6-4f7a-8b9c-500000000001",
+      "name": "receberDadosExterno",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [280, 240]
+    },
+    {
+      "parameters": {
+        "jsCode": "var query = ($json.query || '').trim();\nvar queryLower = query.toLowerCase();\nvar telefone = ($json.telefone || '').replace('@s.whatsapp.net', '');\n\nvar action = 'consultar';\n\nif (queryLower.indexOf('definir') > -1 || queryLower.indexOf('establecer') > -1 || queryLower.indexOf('limite') > -1 || queryLower.indexOf('teto') > -1 || queryLower.indexOf('definir') > -1 || queryLower.indexOf('set') > -1) {\n  action = 'definir';\n} else if (queryLower.indexOf('eliminar') > -1 || queryLower.indexOf('borrar') > -1 || queryLower.indexOf('quitar') > -1 || queryLower.indexOf('excluir') > -1 || queryLower.indexOf('apagar') > -1 || queryLower.indexOf('remover') > -1) {\n  action = 'eliminar';\n}\n\nvar stopWords = ['definir','establecer','limite','teto','set','eliminar','borrar','quitar','excluir','apagar','remover','presupuesto','presupuestos','orcamento','la','el','una','un','de','por','para','favor','puede','puedes','consultar','ver','mostrar','mis','meus','minhas','quero','quiero','cuanto','quanto','como','esta','gastar','gasto','categoria'];\n\nvar words = queryLower.replace(/[?!.,;:$]/g, '').split(/\\s+/);\nvar significant = [];\nvar monto = 0;\n\nfor (var i = 0; i < words.length; i++) {\n  var num = parseFloat(words[i]);\n  if (!isNaN(num) && num > 0) {\n    monto = num;\n  } else if (words[i].length > 1 && stopWords.indexOf(words[i]) === -1) {\n    significant.push(words[i]);\n  }\n}\n\nvar categoria = '';\nfor (var j = 0; j < significant.length; j++) {\n  var w = significant[j];\n  categoria += w.charAt(0).toUpperCase() + w.slice(1);\n  if (j < significant.length - 1) categoria += ' ';\n}\n\nreturn [{ json: { action: action, categoria: categoria, monto_limite: monto, telefone: telefone } }];"
+      },
+      "id": "c1a2b3c4-d5e6-4f7a-8b9c-500000000002",
+      "name": "Parsear Query",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [480, 240]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://bolsillo.ktuche.com/api/webhook/presupuestos",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "keypair",
+        "bodyParameters": {
+          "parameters": [
+            { "name": "action", "value": "consultar" },
+            { "name": "whatsapp", "value": "={{ $json.telefone }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c1a2b3c4-d5e6-4f7a-8b9c-500000000003",
+      "name": "Consultar Presupuestos (API)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [680, 240],
+      "onError": "continue",
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "R1qKKa1g1IqG8OAo",
+          "name": "Whatsapp Bearer Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "var parsed = $node['Parsear Query'].json;\nvar resposta = $input.first().json;\nvar action = parsed.action;\nvar presupuestos = resposta.presupuestos || [];\n\nif (action === 'consultar') {\n  if (presupuestos.length === 0) {\n    return [{ json: { skip: true, mensagem: '📊 No tienes presupuestos definidos para este mes.' } }];\n  }\n  var lista = '';\n  for (var i = 0; i < presupuestos.length; i++) {\n    var p = presupuestos[i];\n    lista += p.alerta + ' *' + p.categoria + '*\\n';\n    lista += '  Límite: ' + p.limite + ' | Gastado: ' + p.gastado + ' (' + p.porcentaje + ')\\n';\n    lista += '  Restante: ' + p.restante + '\\n\\n';\n  }\n  return [{ json: { skip: true, mensagem: '📊 *Tus Presupuestos:*\\n\\n' + lista.trim() } }];\n}\n\nif (action === 'definir') {\n  if (!parsed.categoria) {\n    return [{ json: { skip: true, mensagem: '⚠️ Necesito la categoría. Ejemplo: definir presupuesto Alimentación 500000' } }];\n  }\n  if (!parsed.monto_limite || parsed.monto_limite <= 0) {\n    return [{ json: { skip: true, mensagem: '⚠️ Necesito el monto. Ejemplo: definir presupuesto Alimentación 500000' } }];\n  }\n  return [{ json: { skip: false, action: 'definir', categoria: parsed.categoria, monto_limite: parsed.monto_limite, telefone: parsed.telefone } }];\n}\n\nif (action === 'eliminar') {\n  if (!parsed.categoria) {\n    if (presupuestos.length === 0) {\n      return [{ json: { skip: true, mensagem: '📊 No tienes presupuestos para eliminar.' } }];\n    }\n    var lista2 = '';\n    for (var k = 0; k < presupuestos.length; k++) {\n      lista2 += '• ' + presupuestos[k].categoria + '\\n';\n    }\n    return [{ json: { skip: true, mensagem: '⚠️ Necesito saber cuál. Presupuestos activos:\\n\\n' + lista2.trim() } }];\n  }\n  return [{ json: { skip: false, action: 'eliminar', categoria: parsed.categoria, telefone: parsed.telefone } }];\n}\n\nreturn [{ json: { skip: true, mensagem: '⚠️ Usa: ver presupuestos, definir presupuesto Alimentación 500000, eliminar presupuesto Alimentación' } }];"
+      },
+      "id": "c1a2b3c4-d5e6-4f7a-8b9c-500000000004",
+      "name": "Processar Resultado",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [880, 240]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "precisa-acao-presu",
+              "leftValue": "={{ String($json.skip) }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "c1a2b3c4-d5e6-4f7a-8b9c-500000000005",
+      "name": "Precisa Executar?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1080, 240]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://bolsillo.ktuche.com/api/webhook/presupuestos",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "keypair",
+        "bodyParameters": {
+          "parameters": [
+            { "name": "action", "value": "={{ $json.action }}" },
+            { "name": "categoria", "value": "={{ $json.categoria || '' }}" },
+            { "name": "monto_limite", "value": "={{ $json.monto_limite || '' }}" },
+            { "name": "whatsapp", "value": "={{ $json.telefone }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c1a2b3c4-d5e6-4f7a-8b9c-500000000006",
+      "name": "Executar Acao (API)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1300, 160],
+      "onError": "continue",
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "R1qKKa1g1IqG8OAo",
+          "name": "Whatsapp Bearer Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "var resposta = $input.first().json;\n\nif (resposta.mensagem) {\n  return [{ json: { success: true, message: resposta.mensagem } }];\n}\n\nif (resposta.success) {\n  return [{ json: { success: true, message: resposta.message || '✅ Operación completada.' } }];\n}\n\nreturn [{ json: { success: false, message: '❌ Error: ' + (resposta.error || 'Algo salió mal.') } }];"
+      },
+      "id": "c1a2b3c4-d5e6-4f7a-8b9c-500000000007",
+      "name": "Formatar Resposta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [1500, 240]
+    }
+  ],
+  "connections": {
+    "receberDadosExterno": {
+      "main": [[{ "node": "Parsear Query", "type": "main", "index": 0 }]]
+    },
+    "Parsear Query": {
+      "main": [[{ "node": "Consultar Presupuestos (API)", "type": "main", "index": 0 }]]
+    },
+    "Consultar Presupuestos (API)": {
+      "main": [[{ "node": "Processar Resultado", "type": "main", "index": 0 }]]
+    },
+    "Processar Resultado": {
+      "main": [[{ "node": "Precisa Executar?", "type": "main", "index": 0 }]]
+    },
+    "Precisa Executar?": {
+      "main": [
+        [{ "node": "Executar Acao (API)", "type": "main", "index": 0 }],
+        [{ "node": "Formatar Resposta", "type": "main", "index": 0 }]
+      ]
+    },
+    "Executar Acao (API)": {
+      "main": [[{ "node": "Formatar Resposta", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" }
+}

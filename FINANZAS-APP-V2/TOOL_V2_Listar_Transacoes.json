@@ -1,0 +1,137 @@
+{
+  "name": "TOOL_V2_Listar_Transacoes",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "query",
+              "type": "string"
+            },
+            {
+              "name": "telefone",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "id": "e3a1d9b4-5c2d-4e1a-8f9a-c2b3d4e5f6a9",
+      "name": "receberDadosExterno",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        380,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const telefone = ($json.telefone || '').replace('@s.whatsapp.net', '');\nconst query = ($json.query || '').toLowerCase();\n\n// Extrai quantidade se a pessoa pediu \"veja as ultimas 10\", senao padrão 5\nlet limite = 5;\nconst numMatch = query.match(/\\b(\\d+)\\b/);\nif (numMatch) {\n  limite = parseInt(numMatch[1], 10);\n  if (limite > 20) limite = 20; // limite max da API\n}\n\nreturn [{\n  json: {\n    telefone: telefone,\n    limite: limite\n  }\n}];"
+      },
+      "id": "c7a7bd4c-6fa4-41d9-83bc-6e47d1b33333",
+      "name": "Parsear Query",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        580,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://bolsillo.ktuche.com/api/webhook/transacciones",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "keypair",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "action",
+              "value": "listar"
+            },
+            {
+              "name": "whatsapp",
+              "value": "={{ $json.telefone }}"
+            },
+            {
+              "name": "limite",
+              "value": "={{ $json.limite }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e4b2c1d3-6e3f-4a0b-9c1d-8e2f3a4b5c6e",
+      "name": "Buscar Transacciones (API)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        800,
+        240
+      ],
+      "onError": "continue",
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "R1qKKa1g1IqG8OAo",
+          "name": "Whatsapp Bearer Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const resposta = $input.first().json;\n\nif (resposta.success) {\n  return [{\n    json: {\n      success: true,\n      message: resposta.message\n    }\n  }];\n}\n\nreturn [{\n  json: {\n    success: false,\n    message: `❌ Error: ${resposta.error || 'Algo salió mal al cargar tus registros.'}`\n  }\n}];"
+      },
+      "id": "d5cd1d3a-6e3f-4a0b-9c1d-8e2f3a4b5c6f",
+      "name": "Formatar Resposta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        1020,
+        240
+      ]
+    }
+  ],
+  "connections": {
+    "receberDadosExterno": {
+      "main": [
+        [
+          {
+            "node": "Parsear Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parsear Query": {
+      "main": [
+        [
+          {
+            "node": "Buscar Transacciones (API)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Transacciones (API)": {
+      "main": [
+        [
+          {
+            "node": "Formatar Resposta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

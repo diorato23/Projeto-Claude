@@ -987,59 +987,15 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "action": "={{ $json.query.action }}",
-            "transaccion_id": "={{ $json.query.transaccion_id }}",
-            "telefone": "={{ $('trataDados').first().json.telefone }}",
-            "monto": "={{ $json.query.monto }}",
-            "descripcion": "={{ $json.query.descripcion }}",
-            "categoria": "={{ $json.query.categoria }}"
+            "query": "={{ $json.query }}",
+            "telefone": "={{ $('trataDados').first().json.telefone }}"
           },
           "matchingColumns": [],
           "schema": [
             {
-              "id": "action",
-              "displayName": "action",
+              "id": "query",
+              "displayName": "query",
               "required": true,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "transaccion_id",
-              "displayName": "transaccion_id",
-              "required": true,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "monto",
-              "displayName": "monto",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "number",
-              "removed": false
-            },
-            {
-              "id": "descripcion",
-              "displayName": "descripcion",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "categoria",
-              "displayName": "categoria",
-              "required": false,
               "defaultMatch": false,
               "display": true,
               "canBeUsedToMatch": true,
@@ -1071,37 +1027,15 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "action": "={{ $json.query.action }}",
-            "nombre": "={{ $json.query.nombre }}",
-            "categoria_id": "={{ $json.query.categoria_id }}",
+            "query": "={{ $json.query }}",
             "telefone": "={{ $('trataDados').first().json.telefone }}"
           },
           "matchingColumns": [],
           "schema": [
             {
-              "id": "action",
-              "displayName": "action",
+              "id": "query",
+              "displayName": "query",
               "required": true,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "nombre",
-              "displayName": "nombre",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "categoria_id",
-              "displayName": "categoria_id",
-              "required": false,
               "defaultMatch": false,
               "display": true,
               "canBeUsedToMatch": true,
@@ -1133,48 +1067,15 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "action": "={{ $json.query.action }}",
-            "categoria": "={{ $json.query.categoria }}",
-            "monto_limite": "={{ $json.query.monto_limite }}",
-            "mes_anio": "={{ $json.query.mes_anio }}",
+            "query": "={{ $json.query }}",
             "telefone": "={{ $('trataDados').first().json.telefone }}"
           },
           "matchingColumns": [],
           "schema": [
             {
-              "id": "action",
-              "displayName": "action",
+              "id": "query",
+              "displayName": "query",
               "required": true,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "categoria",
-              "displayName": "categoria",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "monto_limite",
-              "displayName": "monto_limite",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "number",
-              "removed": false
-            },
-            {
-              "id": "mes_anio",
-              "displayName": "mes_anio",
-              "required": false,
               "defaultMatch": false,
               "display": true,
               "canBeUsedToMatch": true,
@@ -1206,7 +1107,7 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "query": "={{ $json.query.query }}",
+            "query": "={{ $json.query }}",
             "telefone": "={{ $('trataDados').first().json.telefone }}"
           },
           "matchingColumns": [],

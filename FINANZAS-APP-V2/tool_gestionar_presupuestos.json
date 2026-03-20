@@ -5,21 +5,8 @@
       "parameters": {
         "workflowInputs": {
           "values": [
-            {
-              "name": "action"
-            },
-            {
-              "name": "categoria"
-            },
-            {
-              "name": "monto_limite"
-            },
-            {
-              "name": "mes_anio"
-            },
-            {
-              "name": "telefone"
-            }
+            { "name": "query" },
+            { "name": "telefone" }
           ]
         }
       },
@@ -27,10 +14,17 @@
       "name": "receberDadosExterno",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
-      "position": [
-        380,
-        240
-      ]
+      "position": [380, 240]
+    },
+    {
+      "parameters": {
+        "jsCode": "const query = ($json.query || '').trim();\nconst queryLower = query.toLowerCase();\nconst telefone = ($json.telefone || '').replace('@s.whatsapp.net', '');\n\nlet action = 'consultar';\nlet categoria = '';\nlet monto_limite = 0;\nlet mes_anio = '';\n\n// Detecta ação\nif (queryLower.includes('definir') || queryLower.includes('establecer') || queryLower.includes('crear') || queryLower.includes('set') || queryLower.includes('poner')) {\n  action = 'definir';\n} else if (queryLower.includes('eliminar') || queryLower.includes('borrar') || queryLower.includes('quitar') || queryLower.includes('delete')) {\n  action = 'eliminar';\n} else if (queryLower.includes('editar') || queryLower.includes('cambiar') || queryLower.includes('actualizar') || queryLower.includes('modificar')) {\n  action = 'editar';\n}\n\n// Extrai monto\nconst montoMatch = query.match(/(\\d[\\d.,]+)/);\nif (montoMatch) {\n  monto_limite = Number(montoMatch[1].replace(/\\./g, '').replace(',', '.'));\n}\n\n// Extrai mes_anio (formato YYYY-MM)\nconst mesMatch = query.match(/(\\d{4}-\\d{2})/);\nif (mesMatch) {\n  mes_anio = mesMatch[1];\n}\n\n// Extrai categoria - remove palavras de ação\nconst removeWords = ['definir','establecer','crear','set','poner','eliminar','borrar','quitar','delete','editar','cambiar','actualizar','modificar','consultar','ver','presupuesto','presupuestos','para','de','la','el','un','una','en','con','por','favor','puede','puedes','monto','limite','límite'];\nlet cleanCat = query;\n// Remove o monto do texto\nif (montoMatch) cleanCat = cleanCat.replace(montoMatch[0], '');\nif (mesMatch) cleanCat = cleanCat.replace(mesMatch[0], '');\nremoveWords.forEach(w => {\n  cleanCat = cleanCat.replace(new RegExp('\\\\b' + w + '\\\\b', 'gi'), '');\n});\ncategoria = cleanCat.replace(/[?!.,;:$]/g, '').trim();\n\n// Capitalizar primeira letra\nif (categoria) categoria = categoria.charAt(0).toUpperCase() + categoria.slice(1);\n\nreturn [{ json: { action, categoria, monto_limite, mes_anio, telefone, originalQuery: query } }];"
+      },
+      "id": "parse-pres-query-node",
+      "name": "Parsear Query",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1.2,
+      "position": [580, 240]
     },
     {
       "parameters": {
@@ -42,38 +36,22 @@
         "specifyBody": "keypair",
         "bodyParameters": {
           "parameters": [
-            {
-              "name": "action",
-              "value": "={{ $json.action || \"consultar\" }}"
-            },
-            {
-              "name": "categoria",
-              "value": "={{ $json.categoria || \"\" }}"
-            },
-            {
-              "name": "monto_limite",
-              "value": "={{ Number($json.monto_limite) || 0 }}"
-            },
-            {
-              "name": "mes_anio",
-              "value": "={{ $json.mes_anio || \"\" }}"
-            },
-            {
-              "name": "whatsapp",
-              "value": "={{ $json.telefone ? $json.telefone.replace('@s.whatsapp.net', '') : \"\" }}"
-            }
+            { "name": "action", "value": "={{ $json.action }}" },
+            { "name": "categoria", "value": "={{ $json.categoria }}" },
+            { "name": "monto_limite", "value": "={{ $json.monto_limite || 0 }}" },
+            { "name": "mes_anio", "value": "={{ $json.mes_anio || '' }}" },
+            { "name": "whatsapp", "value": "={{ $json.telefone }}" }
           ]
         },
         "options": {}
       },
-      "id": "j6k7l8m9-n0o1-p2q3-r4s5-t6u7v8w9x0y1",
-      "name": "HTTP Request",
+      "id": "ejecutar-pres-accion-node",
+      "name": "Ejecutar Accion",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
-      "position": [
-        600,
-        240
-      ],
+      "position": [800, 240],
+      "onError": "continue",
+      "alwaysOutputData": true,
       "credentials": {
         "httpBearerAuth": {
           "id": "R1qKKa1g1IqG8OAo",
@@ -83,68 +61,37 @@
     },
     {
       "parameters": {
-        "jsCode": "const resposta = $input.first().json;\nconst acao = $node[\"receberDadosExterno\"].json.action || 'consultar';\n\nif (resposta.success) {\n  if (acao === 'consultar') {\n    if (resposta.presupuestos.length === 0) {\n        return [{ json: { mensagem: \"💰 *Presupuestos:*\\n\\nNo tienes presupuestos definidos para este periodo.\" }}];\n    }\n    const lista = resposta.presupuestos.map(p => \n      `• *${p.categoria}*: ${p.gastado} / ${p.limite} (${p.porcentaje}) ${p.alerta}`\n    ).join('\\n');\n    return [{ json: { mensagem: `💰 *Estado de Presupuestos (${resposta.periodo}):*\\n\\n${lista}` }}];\n  }\n  return [{ json: { mensagem: resposta.message || \"✅ Presupuesto actualizado\" }}];\n}\n\nreturn [{ json: { mensagem: `❌ *Error:* ${resposta.error || 'Desconhecido'}` }}];"
+        "jsCode": "const resposta = $input.first().json;\nconst parsed = $node['Parsear Query'].json;\n\nif (resposta.success) {\n  if (parsed.action === 'consultar') {\n    if (!resposta.presupuestos || resposta.presupuestos.length === 0) {\n      return [{ json: { mensagem: '💰 *Presupuestos:*\\n\\nNo tienes presupuestos definidos para este periodo.' } }];\n    }\n    const lista = resposta.presupuestos.map(p =>\n      `• *${p.categoria}*: ${p.gastado} / ${p.limite} (${p.porcentaje}) ${p.alerta}`\n    ).join('\\n');\n    return [{ json: { mensagem: `💰 *Estado de Presupuestos (${resposta.periodo}):*\\n\\n${lista}` } }];\n  }\n  return [{ json: { mensagem: resposta.message || '✅ Presupuesto actualizado.' } }];\n}\n\nreturn [{ json: { mensagem: `❌ Error: ${resposta.error || 'Error desconocido'}` } }];"
       },
-      "id": "k7l8m9n0-o1p2-q3r4-s5t6-u7v8w9x0y1z2",
+      "id": "format-pres-response-node",
       "name": "Formatar Resposta",
       "type": "n8n-nodes-base.code",
       "typeVersion": 1.2,
-      "position": [
-        820,
-        240
-      ]
+      "position": [1020, 240]
     },
     {
-      "parameters": {
-        "options": {}
-      },
-      "id": "l8m9n0o1-p2q3-r4s5-t6u7-v8w9x0y1z2a3",
+      "parameters": { "options": {} },
+      "id": "retornoFinalPres",
       "name": "Retorno Final",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [
-        1040,
-        240
-      ]
+      "position": [1240, 240]
     }
   ],
   "connections": {
     "receberDadosExterno": {
-      "main": [
-        [
-          {
-            "node": "HTTP Request",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{ "node": "Parsear Query", "type": "main", "index": 0 }]]
     },
-    "HTTP Request": {
-      "main": [
-        [
-          {
-            "node": "Formatar Resposta",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+    "Parsear Query": {
+      "main": [[{ "node": "Ejecutar Accion", "type": "main", "index": 0 }]]
+    },
+    "Ejecutar Accion": {
+      "main": [[{ "node": "Formatar Resposta", "type": "main", "index": 0 }]]
     },
     "Formatar Resposta": {
-      "main": [
-        [
-          {
-            "node": "Retorno Final",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{ "node": "Retorno Final", "type": "main", "index": 0 }]]
     }
   },
   "active": false,
-  "settings": {
-    "executionOrder": "v1"
-  }
+  "settings": { "executionOrder": "v1" }
 }
