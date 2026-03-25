@@ -58,3 +58,4 @@
 | Data | Observações |
 |------|-------------|
 | 20/03/2026 | ✅ Todos os 18 testes passaram com sucesso. Isolamento de dados por familia_id confirmado. |
+aporteenlinea
